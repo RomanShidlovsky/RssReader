@@ -18,22 +18,9 @@ import javax.net.ssl.HttpsURLConnection
 import by.bsuir.rssreader.WebViewActivity
 
 class RssFragment : Fragment() {
-    var rssItems = ArrayList<RssItem>()
-    var listView : RecyclerView? = null
+    private var rssItems = ArrayList<RssItem>()
+    private var listView : RecyclerView? = null
     private var adapter : RssItemRecyclerViewAdapter = RssItemRecyclerViewAdapter(rssItems, activity)
-
-    companion object {
-        private const val ARG_URLS = "urls"
-
-        fun newInstance(urls: ArrayList<String>): RssFragment {
-            val fragment = RssFragment()
-            val args = Bundle().apply {
-                putStringArrayList(ARG_URLS, ArrayList(urls))
-            }
-            fragment.arguments = args
-            return fragment
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,10 +35,8 @@ class RssFragment : Fragment() {
     }
 
     fun updateRV(rssItemsL: List<RssItem>) {
-        if (rssItemsL.isNotEmpty()) {
             rssItems.addAll(rssItemsL)
             adapter?.notifyDataSetChanged()
-        }
     }
 
     class RssFeedFetcher(val context: RssFragment) : AsyncTask<URL, Void, List<RssItem>>() {
@@ -114,8 +99,41 @@ class RssFragment : Fragment() {
        // val url = URL(RSS_FEED_LINK)
 
 
-        val urls = arguments?.getStringArrayList(ARG_URLS) ?: arrayListOf()
-        val feedFetcher = RssFeedFetcher(this)
-        feedFetcher.execute(*urls.map { URL(it) }.toTypedArray())
+//        val urlsStr = arguments?.getStringArrayList(ARG_URLS) ?: arrayListOf()
+//        val feedFetcher = RssFeedFetcher(this)
+//
+//        val urls = ArrayList<URL>()
+//
+//        urlsStr.forEach{
+//            try {
+//                val url = URL(it)
+//                urls.add(url)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+//
+//
+//        feedFetcher.execute(*urls.toTypedArray())
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        val prefs = requireContext().getSharedPreferences("rss_urls", Context.MODE_PRIVATE)
+        val urlsStr = prefs.getStringSet("urls", setOf()) ?: emptySet()
+
+
+
+        urlsStr.forEach{
+            try {
+                val url = URL(it)
+                val feedFetcher = RssFeedFetcher(this)
+                feedFetcher.execute(url)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 }
