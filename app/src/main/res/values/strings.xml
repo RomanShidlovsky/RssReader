@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RssReader</string>
+    <string name="enter_url">Enter URL</string>
+    <string name="add_url">Add URL</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+</resources>
